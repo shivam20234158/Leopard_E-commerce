@@ -77,13 +77,13 @@ export const login = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(401).json({ message: "Invalid Credential" });
+            return res.status(400).json({ message: "Invalid Credential" });
         }
 
         const isCorrectPassword = await user.comparePassword(password);
 
         if (!isCorrectPassword) {
-            return res.status(401).json({ message: "Invalid Credential" });
+            return res.status(400).json({ message: "Invalid Credential" });
         }
         const { accessToken, refreshToken } = generateTokens(user._id);
 
