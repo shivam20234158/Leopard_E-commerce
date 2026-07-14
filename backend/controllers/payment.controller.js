@@ -65,7 +65,7 @@ export const createCheckoutSession = async (req, res) => {
 				),
 			},
 		});
-		//200*100 cents
+		//200*100 cents(200 dollars)
 		if (totalAmount >= 20000) {
 			await createNewCoupon(req.user._id);
 		}

@@ -13,6 +13,7 @@ import AdminPage from "./pages/AdminPage";
 import { useCartStore } from "./stores/useCartStore";
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import PurchaseCancelPage from "./pages/PurchaseCancelPage";
+import ChatBot from "./components/ChatBot";
 
 function App() {
   const {user,checkAuth,checkingAuth}=useUserStore();
@@ -59,6 +60,7 @@ function App() {
           <Route path='/purchase-cancel' element={user ? <PurchaseCancelPage /> : <Navigate to='/login' />} />
 
         </Routes>
+        <ChatBot/>
       </div>
       <Toaster/>
     </div>

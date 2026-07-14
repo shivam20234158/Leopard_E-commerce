@@ -70,11 +70,12 @@ export const updateQuantity=async(req,res)=>{
 export const getCartProducts=async (req,res)=>{
     try{
         //from the model cartItems se Id milegi
-        const products=await Product.find({_id:{$in:req.user.cartItems}});
+        const user=req.user;
+        const products=await Product.find({_id:{$in:user.cartItems}});
 
-        //go into each product
+        //go into each product for quantity 
         const cartItems=products.map(product=>{
-            const item=req.user.cartItems.find(cartItem=>cartItem.id===product.id);
+            const item=user.cartItems.find(cartItem=>cartItem.id===product.id);
             return {...product.toJSON(),quantity:item.quantity}
         })
         res.json(cartItems);
@@ -84,3 +85,14 @@ export const getCartProducts=async (req,res)=>{
         res.status(500).json({message:"Server Error",error:error.meassage});
     }
 }
+
+// export const removeAll=async(req,res)=>{
+//     try{
+//         const productId=req.body.productId;
+//         const user=req.user;
+//         const Item=
+//     }
+//     catch(error){
+
+//     }
+// } 

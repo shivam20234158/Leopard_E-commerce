@@ -60,3 +60,11 @@ userSchema.methods.comparePassword=async function(candidatePassword){
 const User=mongoose.model("User",userSchema);
 
 export default User;
+
+// import mongoose from "mongoose";
+
+// const userSchema=new mongoose.Schema({
+
+// },{timestamps:true})
+
+// export default const User=mongoose.model("User",userSchmea);

@@ -13,7 +13,7 @@ const generateTokens = (userId) => {
 };
 
 //save token
-const storeRefreshToken = async (userId, refreshToken) => {
+const storeRefreshToken = async (userId, refreshToken) => { 
     await redis.set(`refresh_token:${userId}`, refreshToken, "EX", 7 * 24 * 60 * 60);
 }
 
@@ -51,7 +51,7 @@ export const signup = async (req, res) => {
         await storeRefreshToken(newUser._id, refreshToken);
 
         setCookies(res, accessToken, refreshToken);
-
+        
         res.status(201).json({
             newUser: {
                 _id: newUser._id,

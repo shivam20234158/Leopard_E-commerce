@@ -58,7 +58,7 @@ export const getDailySalesData = async (startDate, endDate) => {
 		// ]
 
 		const dateArray = getDatesInRange(startDate, endDate);
-		// console.log(dateArray) // ['2024-08-18', '2024-08-19', ... ]
+		// console.log(dateArray) // ['2024-08-18', '2024-08-19', ... ] (for 7 days in a week)
 
 		return dateArray.map((date) => {
 			const foundData = dailySalesData.find((item) => item._id === date);

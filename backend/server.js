@@ -11,10 +11,12 @@ import cartRoutes from "./routes/cart.route.js";
 import couponRoutes from "./routes/coupon.route.js";
 import paymentRoutes from "./routes/payment.route.js";
 import analyticsRoutes from "./routes/analytics.route.js";
+import aiRoutes from "./routes/ai.route.js";
 
 
 import { connectDB } from "./lib/db.js";
 
+//alllow to read content of .env file and add all variable to process.env
 dotenv.config();
 
 const app=express();
@@ -26,6 +28,8 @@ const __dirname=path.resolve();
 //middlewares
 app.use(express.json({limit:"10mb"}));
 app.use(cookieParser());
+
+app.use("/api/ai", aiRoutes);
 
 app.use("/api/auth",authRoutes);
 app.use("/api/products",productRoutes);
@@ -42,8 +46,9 @@ if (process.env.NODE_ENV === "production") {
 	});
 }
 
+//our server is listening on this port
+connectDB();
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
-
-    connectDB();
 })
+ 
