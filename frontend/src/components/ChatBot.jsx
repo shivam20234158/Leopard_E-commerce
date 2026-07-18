@@ -78,9 +78,12 @@ const ChatBot = () => {
 
                     <div className="flex justify-between items-center p-4 border-b border-gray-700">
 
-                        <h2 className="font-bold text-lg">
-                            Leopard AI
-                        </h2>
+                        <div className="flex items-center space-x-2">
+                            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                            <h2 className="font-bold text-lg">
+                                Leopard AI
+                            </h2>
+                        </div>
 
                         <button onClick={() => setOpen(false)}>
                             <X />
@@ -94,7 +97,7 @@ const ChatBot = () => {
 
                             <div
                                 key={index}
-                                className={`max-w-[80%] px-4 py-2 rounded-xl ${
+                                className={`max-w-[80%] px-4 py-2 rounded-xl whitespace-pre-wrap ${
                                     msg.sender === "user"
                                         ? "bg-emerald-600 ml-auto"
                                         : "bg-gray-700"
