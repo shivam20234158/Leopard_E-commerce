@@ -16,7 +16,7 @@ export const chatWithAI = async (req, res) => {
         const prompt = `
 You are an AI shopping assistant.
 
-Your task is to extract product category and price filters.
+Your task is to extract product category, price filters, and any price sorting preferences.
 
 Return ONLY valid JSON.
 
@@ -25,29 +25,32 @@ Schema:
 {
     "category":"",
     "minPrice":0,
-    "maxPrice":0
+    "maxPrice":0,
+    "sortByPrice": "asc" | "desc" | ""
 }
 
 Examples
 
 User:
-Show shoes under 3000
+Show shoes under 3000 from cheapest to most expensive
 
 Response:
 {
     "category":"shoes",
     "minPrice":0,
-    "maxPrice":3000
+    "maxPrice":3000,
+    "sortByPrice":"asc"
 }
 
 User:
-Recommend jackets above 5000
+Recommend jackets above 5000 sorted by price descending
 
 Response:
 {
     "category":"jackets",
     "minPrice":5000,
-    "maxPrice":0
+    "maxPrice":0,
+    "sortByPrice":"desc"
 }
 
 User:
@@ -57,7 +60,8 @@ Response:
 {
     "category":"bags",
     "minPrice":1000,
-    "maxPrice":3000
+    "maxPrice":3000,
+    "sortByPrice":""
 }
 
 User:
@@ -103,8 +107,16 @@ ${message}
             }
         }
 
+        const sortQuery = {};
+        if (filters.sortByPrice === "asc") {
+            sortQuery.price = 1;
+        } else if (filters.sortByPrice === "desc") {
+            sortQuery.price = -1;
+        }
+
         const products = await Product.find(query)
             .select("name price description image category")
+            .sort(sortQuery)
             .limit(5);
 
         if (products.length === 0) {

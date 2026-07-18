@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken"
 import { redis } from "../lib/redis.js"
+import Order from "../models/order.model.js";
 
 const generateTokens = (userId) => {
     const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
@@ -156,6 +157,18 @@ export const getProfile = async (req, res) => {
 	try {
 		res.json(req.user);
 	} catch (error) {
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
+};
+
+export const getMyOrders = async (req, res) => {
+	try {
+		const orders = await Order.find({ user: req.user._id })
+			.populate("products.product")
+			.sort({ createdAt: -1 });
+		res.json(orders);
+	} catch (error) {
+		console.log("Error in getMyOrders controller", error.message);
 		res.status(500).json({ message: "Server error", error: error.message });
 	}
 };
