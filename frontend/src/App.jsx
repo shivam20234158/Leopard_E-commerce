@@ -14,6 +14,7 @@ import { useCartStore } from "./stores/useCartStore";
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import PurchaseCancelPage from "./pages/PurchaseCancelPage";
 import ChatBot from "./components/ChatBot";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   const {user,checkAuth,checkingAuth}=useUserStore();
@@ -58,6 +59,7 @@ function App() {
           <Route path='/cart' element={user ? <CartPage /> : <Navigate to='/login' />} />
           <Route path='/purchase-success' element={user ? <PurchaseSuccessPage /> : <Navigate to='/login' />} />
           <Route path='/purchase-cancel' element={user ? <PurchaseCancelPage /> : <Navigate to='/login' />} />
+          <Route path='/profile' element={user ? <ProfilePage /> : <Navigate to='/login' />} />
 
         </Routes>
         <ChatBot/>
