@@ -26,7 +26,14 @@ const __dirname=path.resolve();
 
 
 //middlewares
-app.use(express.json({limit:"10mb"}));
+app.use(
+	express.json({
+		limit: "10mb",
+		verify: (req, res, buf) => {
+			req.rawBody = buf;
+		},
+	})
+);
 app.use(cookieParser());
 
 app.use("/api/ai", aiRoutes);

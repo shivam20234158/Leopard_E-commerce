@@ -84,6 +84,20 @@ export const createCheckoutSession = async (req, res) => {
 export const checkoutSuccess = async (req, res) => {
 	try {
 		const { sessionId } = req.body;
+		if (!sessionId) {
+			return res.status(400).json({ message: "Session ID is required" });
+		}
+
+		// Check if order was already created by webhook
+		const existingOrder = await Order.findOne({ stripeSessionId: sessionId });
+		if (existingOrder) {
+			return res.status(200).json({
+				success: true,
+				message: "Order already processed.",
+				orderId: existingOrder._id,
+			});
+		}
+
 		const session = await stripe.checkout.sessions.retrieve(sessionId);
 
 		if (session.payment_status === "paid") {
@@ -126,6 +140,91 @@ export const checkoutSuccess = async (req, res) => {
 	} catch (error) {
 		console.error("Error processing successful checkout:", error);
 		res.status(500).json({ message: "Error processing successful checkout", error: error.message });
+	}
+};
+
+export const handleStripeWebhook = async (req, res) => {
+	const sig = req.headers["stripe-signature"];
+	const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+	if (!webhookSecret) {
+		console.error("STRIPE_WEBHOOK_SECRET is not configured in environment variables.");
+		return res.status(500).json({ error: "Webhook secret is not configured" });
+	}
+
+	if (!sig) {
+		console.error("Missing stripe-signature header.");
+		return res.status(400).json({ error: "Missing stripe-signature header" });
+	}
+
+	let event;
+	try {
+		event = stripe.webhooks.constructEvent(req.rawBody, sig, webhookSecret);
+	} catch (err) {
+		console.error(`Webhook signature verification failed: ${err.message}`);
+		return res.status(400).send(`Webhook Error: ${err.message}`);
+	}
+
+	try {
+		if (event.type === "checkout.session.completed") {
+			const session = event.data.object;
+
+			if (session.payment_status === "paid") {
+				// 1. Idempotency Check: check if order already exists
+				const existingOrder = await Order.findOne({ stripeSessionId: session.id });
+				if (existingOrder) {
+					console.log(`Order already fulfilled for session: ${session.id}`);
+					return res.status(200).json({ received: true, message: "Order already processed" });
+				}
+
+				// 2. Deactivate coupon if used
+				if (session.metadata?.couponCode) {
+					await Coupon.findOneAndUpdate(
+						{
+							code: session.metadata.couponCode,
+							userId: session.metadata.userId,
+						},
+						{
+							isActive: false,
+						}
+					);
+				}
+
+				// 3. Create the order
+				const products = session.metadata?.products
+					? JSON.parse(session.metadata.products)
+					: [];
+
+				const newOrder = new Order({
+					user: session.metadata.userId,
+					products: products.map((product) => ({
+						product: product.id,
+						quantity: product.quantity,
+						price: product.price,
+					})),
+					totalAmount: session.amount_total / 100, // convert from cents to dollars
+					stripeSessionId: session.id,
+				});
+
+				await newOrder.save();
+
+				// 4. Clear the user's cart
+				if (session.metadata?.userId) {
+					const user = await User.findById(session.metadata.userId);
+					if (user) {
+						user.cartItems = [];
+						await user.save();
+					}
+				}
+
+				console.log(`Order ${newOrder._id} created successfully via Stripe webhook.`);
+			}
+		}
+
+		res.status(200).json({ received: true });
+	} catch (error) {
+		console.error("Error handling Stripe webhook event:", error);
+		res.status(500).json({ error: "Webhook event processing failed" });
 	}
 };
 
